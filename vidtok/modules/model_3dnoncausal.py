@@ -337,6 +337,7 @@ class Encoder3D(nn.Module):
         self.fix_encoder = ignore_kwargs.get("fix_encoder", False)
         self.time_downsample_factor = ignore_kwargs.get("time_downsample_factor", 4)
         self.tempo_ds = [self.num_resolutions - 2, self.num_resolutions - 3]
+        self.spatial_ds = list(range(0, self.num_resolutions - 1)) # add for spatial tiling
         self.norm_type = norm_type
         self.is_causal = False
 

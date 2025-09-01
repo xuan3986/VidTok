@@ -141,14 +141,17 @@ def main():
     model.to(device).eval()
     assert args.chunk_size % model.encoder.time_downsample_factor == 0
     
+    
     if args.read_long_video:
         assert hasattr(model, 'use_tiling'), "Tiling inference is needed to conduct long video reconstruction."
         print(f"Using tiling inference to save memory usage...")
-        model.use_tiling = True
+        model.enable_tiling()
         model.t_chunk_enc = args.chunk_size
         model.t_chunk_dec = model.t_chunk_enc // model.encoder.time_downsample_factor
-        model.use_overlap = True
-
+    
+    if args.input_width > 256:
+        model.enable_tiling()
+   
     dataset = MultiVideoDataset(
         data_dir=args.data_dir, 
         meta_path=args.meta_path,
@@ -171,7 +174,6 @@ def main():
         for i, input in tqdm(enumerate(dataloader)):
             input = input.to(device)
             _, output, reg_log = model(input)
-
             output = output.clamp(-1, 1)
             input, output = map(lambda x: (x + 1) / 2, (input, output))
 
